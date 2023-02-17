@@ -28,7 +28,7 @@ write-host "  \/_____/   \/_/\/_/   \/_/\/_/   \/_/ /_/   \/_/\/_/   \/_/     \/
 write-host "                                                                                              "
 
 Write-Host "Written by Benjamin and Madeline"
-Write-Host "Version 0.2.1"
+Write-Host "Version 0.2.2"
 
 #Setup dependancies
 try {
