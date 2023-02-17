@@ -90,6 +90,8 @@ function Get-SearchFromUser {
 	#Combine the email address and the subject into one string
     $InputMatchQuery="(From:"+$InputPhishSenderName+") AND (Subject:`""+$InputPhishSubject+"`")"
 
+    Write-Host "Building search..."
+
     #Create a Content Search to find the message
     $Search=New-ComplianceSearch -Name $ContentSearchName -ExchangeLocation All -ContentMatchQuery $InputMatchQuery
 
