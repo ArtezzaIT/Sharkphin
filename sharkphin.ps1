@@ -142,7 +142,6 @@ function BlockThem {
         $response = Read-Host -Prompt "Would you like to mark the entire $phishdomain domain as spam in this tenant? (Y/N)"
         $response = $response.ToLower()
         if ($response -eq 'y') {
-            Connect-ExchangeOnline -ShowBanner:$false
             New-TenantAllowBlockListItems -ListType Sender -Block -Entries $phishdomain -NoExpiration
             break
         }
