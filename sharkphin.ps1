@@ -115,8 +115,16 @@ function Get-SearchFromUser {
     Write-Host "Building search..."
 
     #Create a Content Search to find the message
-    $Search=New-ComplianceSearch -Name $ContentSearchName -ExchangeLocation All -ContentMatchQuery $InputMatchQuery
-
+    try{
+        $Search=New-ComplianceSearch -Name $ContentSearchName -ExchangeLocation All -ContentMatchQuery $InputMatchQuery
+    } catch {
+        #If the search fails, cut back to the main menu.
+        Write-Host "There was an error creating the content search in 365. The search query generated was:"
+        Write-Host $InputMatchQuery
+        Write-Host "Please consider reporting an issue at https://github.com/ArtezzaIT/Sharkphin/issues"
+        Write-Host "You are now being returned to the main menu..."
+        main_menu
+    }
 
     #Start Content Search
     Start-ComplianceSearch -Identity $Search.Identity
