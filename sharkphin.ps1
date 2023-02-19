@@ -14,6 +14,9 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+$version = "0.3.0"
+$channel = "stable"
+
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
 write-host "       /\  __ \   /\  == \   /\__  _\ /\  ___\   /\___  \   /\___  \   /\  __ \               "
 write-host "       \ \  __ \  \ \  __<   \/_/\ \/ \ \  __\   \/_/  /__  \/_/  /__  \ \  __ \              "
@@ -28,7 +31,26 @@ write-host "  \/_____/   \/_/\/_/   \/_/\/_/   \/_/ /_/   \/_/\/_/   \/_/     \/
 write-host "                                                                                              "
 
 Write-Host "Written by Benjamin and Madeline"
-Write-Host "Version 0.2.2"
+Write-Host "Version $version, $channel channel"
+
+#Check if running the latest/recommended version
+try {
+    $availableonline = (invoke-webrequest -uri https://sharkphin.artezza.io/latest.json -usebasicparsing).content | ConvertFrom-Json
+    if ($availableonline.$channel[0] -ne $version){
+        Write-host "You are not running the recommended version for the $channel channel!"
+        $updatechoice = Read-Host "Would you like to download the recommended verion? (y/N)"
+        if ($updatechoice.ToLower() -eq "y"){
+            $downloadlnk = $availableonline.$channel[1]
+            cmd /c "START $downloadlnk"
+            exit
+        }
+    } else {
+        Write-Host "This version is up to date! You're running $version, $channel"
+    }
+}
+catch {
+    Write-Host "There was an error checking for updates. You can always check for new versions at https://sharkphin.artezza.io"
+}
 
 #Setup dependancies
 try {
