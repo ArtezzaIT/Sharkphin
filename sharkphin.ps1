@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-$version = "0.3.0"
+$version = "0.3.1"
 $channel = "stable"
 
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
@@ -68,8 +68,8 @@ catch {
 #Connect to Security & Compliance PowerShell, then Exchange Online
 try{
     Import-Module ExchangeOnlineManagement
-    Connect-IPPSSession
-    Connect-ExchangeOnline -ShowBanner:$false
+    Connect-IPPSSession -ShowBanner:$false
+    Connect-ExchangeOnline -ShowBanner:$false -UserPrincipalName (Get-ConnectionInformation).UserPrincipalName
 }
 catch {
     Write-Host "There was an error signing into the 365 tenant. Please verify the credentials you are using are correct and that the Exchange Online Module is installed."
