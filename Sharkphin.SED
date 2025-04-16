@@ -3,7 +3,7 @@ Class=IEXPRESS
 SEDVersion=3
 [Options]
 PackagePurpose=InstallApp
-ShowInstallProgramWindow=3
+ShowInstallProgramWindow=0
 HideExtractAnimation=0
 UseLongFileName=1
 InsideCompressed=0
@@ -22,18 +22,30 @@ UserQuietInstCmd=%UserQuietInstCmd%
 SourceFiles=SourceFiles
 [Strings]
 InstallPrompt=
-DisplayLicense=license.txt
-FinishMessage=Thank you for using Artezza software!
+DisplayLicense=LICENSE.txt
+FinishMessage=Thank you for using Artezza Sharkphin!
 TargetName=Sharkphin.exe
 FriendlyName=Artezza Sharkphin
 AppLaunched=cmd /c launcher.bat
 PostInstallCmd=<None>
 AdminQuietInstCmd=
 UserQuietInstCmd=
-FILE0="launcher.bat"
-FILE1="sharkphin.ps1"
+FILE0="404.html"
+FILE1="app.html"
+FILE2="background.jpg"
+FILE3="favicon.ico"
+FILE4="launcher.bat"
+FILE5="logout.html"
+FILE6="search.html"
+FILE7="Sharkphin.ps1"
 [SourceFiles]
 SourceFiles0=
 [SourceFiles0]
 %FILE0%=
 %FILE1%=
+%FILE2%=
+%FILE3%=
+%FILE4%=
+%FILE5%=
+%FILE6%=
+%FILE7%=

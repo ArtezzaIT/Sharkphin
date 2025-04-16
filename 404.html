@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>Sharkphin: 404</title>
+    <style>
+        body {
+            background-image: url("/background.jpg");
+        }
+        div {
+            display: table; /* Makes the div only as wide as its content */
+            background-color: rgba(249, 249, 249, 0.8); /* Slightly transparent background */
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p>
+            The requested page could not be found. You will be returned to the <a href="/">home</a> page in a moment.
+        </p>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 10000);
+    </script>
+</body>

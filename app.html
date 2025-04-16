@@ -1,0 +1,251 @@
+<html>
+<head>
+    <title>Sharkphin</title>
+    <style>
+        body {
+            background-image: url("/background.jpg");
+        }
+        div {
+            display: table; /* Makes the div only as wide as its content */
+            background-color: rgba(249, 249, 249, 0.8); /* Slightly transparent background */
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Connection Information</h1>
+        You are connected using ##UPN##
+        <a href="/logout">Logout</a>
+    </div>
+    <br>
+    <div>
+        <h1>Create New Search</h1>
+        <form action="/search" method="get">
+            <table>
+                <tr>
+                    <td>
+                        <label for="name">Search Name:</label>
+                    </td>
+                    <td>
+                        <input type="text" id="name" name="name" required>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="sender">Sender Address:</label>
+                    </td>
+                    <td>
+                        <input type="text" id="sender" name="sender" required>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="subject">Message Subject:</label>
+                    </td>
+                    <td>
+                        <input type="text" id="subject" name="subject" required>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button type="submit">Create Search</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <br>
+    <div>
+        <h1>Existing Searches</h1>
+        <p>Search data is updated automatically. Thank you for your patience.</p>
+        <table id="AllSearches">
+            <tr>
+                <th>Name</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+    </div>
+    <script>
+        async function updateSearchStatus() {
+            try {
+                const response = await fetch('/searchstatus');
+                console.log('Response:', response);
+                const data = await response.json();
+                console.log(data);
+
+                const table = document.getElementById('AllSearches');
+                // Clear existing rows except the header
+                table.innerHTML = `
+                    <tr>
+                        <th>Name</th>
+                        <th>Items</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                `;
+                if (Array.isArray(data)) {
+                    data.forEach(search => {
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = search.Name;
+                        row.insertCell(1).textContent = search.Items;
+                        row.insertCell(2).textContent = search.Status;
+                        const actionsCell = row.insertCell(3);
+                        //Delete button
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = () => deleteSearch(search.Name);
+                        actionsCell.appendChild(deleteButton);
+                        //Purge button
+                        const purgeButton = document.createElement('button');
+                        purgeButton.textContent = 'Purge';
+                        purgeButton.onclick = () => purgeSearch(search.Name);
+                        actionsCell.appendChild(purgeButton);
+                        //Restart button
+                        const restartButton = document.createElement('button');
+                        restartButton.textContent = 'Restart';
+                        restartButton.onclick = () => restartSearch(search.Name);
+                        actionsCell.appendChild(restartButton);
+                    });
+                } else if (typeof data === 'object' && data !== null) {
+                    if (data.Message) {
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = data.Message;
+                    } else {
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = data.Name;
+                        row.insertCell(1).textContent = data.Items;
+                        row.insertCell(2).textContent = data.Status;
+                        const actionsCell = row.insertCell(3);
+                        //Delete button
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = () => deleteSearch(data.Name);
+                        actionsCell.appendChild(deleteButton);
+                        //Purge button
+                        const purgeButton = document.createElement('button');
+                        purgeButton.textContent = 'Purge';
+                        purgeButton.onclick = () => purgeSearch(data.Name);
+                        actionsCell.appendChild(purgeButton);
+                        //Restart button
+                        const restartButton = document.createElement('button');
+                        restartButton.textContent = 'Restart';
+                        restartButton.onclick = () => restartSearch(data.Name);
+                        actionsCell.appendChild(restartButton);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error fetching search status:', error);
+            }
+        }
+
+        function deleteSearch(name) {
+            if (!confirm(`Are you sure you want to delete the search "${name}"?`)) {
+                return;
+            }
+            const loadingMessage = document.createElement('div');
+            loadingMessage.textContent = 'Deleting search, please wait...';
+            loadingMessage.style.position = 'fixed';
+            loadingMessage.style.top = '10px';
+            loadingMessage.style.left = '50%';
+            loadingMessage.style.transform = 'translateX(-50%)';
+            loadingMessage.style.backgroundColor = '#db31f5';
+            loadingMessage.style.border = '1px solid #ccc';
+            loadingMessage.style.padding = '10px';
+            loadingMessage.style.borderRadius = '5px';
+            loadingMessage.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+            document.body.appendChild(loadingMessage);
+
+            setTimeout(() => {
+                document.body.removeChild(loadingMessage);
+            }, 3000);
+            fetch(`/delete?name=${encodeURIComponent(name)}`)
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    console.log(data);
+                })
+                .catch(error => {
+                    alert('Error deleting search:', error);
+                    console.log(data);
+                });
+            console.log('Delete search with id:', name);
+            updateSearchStatus();
+        }
+        function purgeSearch(name) {
+            if (!confirm(`Are you sure you want to purge the search "${name}"?`)) {
+                return;
+            }
+            const loadingMessage = document.createElement('div');
+            loadingMessage.textContent = 'Purging search, please wait...';
+            loadingMessage.style.position = 'fixed';
+            loadingMessage.style.top = '10px';
+            loadingMessage.style.left = '50%';
+            loadingMessage.style.transform = 'translateX(-50%)';
+            loadingMessage.style.backgroundColor = '#db31f5';
+            loadingMessage.style.border = '1px solid #ccc';
+            loadingMessage.style.padding = '10px';
+            loadingMessage.style.borderRadius = '5px';
+            loadingMessage.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+            document.body.appendChild(loadingMessage);
+
+            setTimeout(() => {
+                document.body.removeChild(loadingMessage);
+            }, 3000);
+            fetch(`/purge?name=${encodeURIComponent(name)}`)
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    console.log(data);
+                })
+                .catch(error => {
+                    alert('Error purging search:', error);
+                    console.log(data);
+                });
+            console.log('Purge search with id:', name);
+            updateSearchStatus();
+        }
+        function restartSearch(name) {
+            const loadingMessage = document.createElement('div');
+            loadingMessage.textContent = 'Restarting search, please wait...';
+            loadingMessage.style.position = 'fixed';
+            loadingMessage.style.top = '10px';
+            loadingMessage.style.left = '50%';
+            loadingMessage.style.transform = 'translateX(-50%)';
+            loadingMessage.style.backgroundColor = '#db31f5';
+            loadingMessage.style.border = '1px solid #ccc';
+            loadingMessage.style.padding = '10px';
+            loadingMessage.style.borderRadius = '5px';
+            loadingMessage.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+            document.body.appendChild(loadingMessage);
+
+            setTimeout(() => {
+                document.body.removeChild(loadingMessage);
+            }, 3000);
+            fetch(`/restart?name=${encodeURIComponent(name)}`)
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    console.log(data);
+                })
+                .catch(error => {
+                    alert('Error restarting search:', error);
+                    console.log(data);
+                });
+            console.log('Restarting search with id:', name);
+            updateSearchStatus();
+        }
+
+
+        setTimeout(() => {
+            updateSearchStatus();
+            setInterval(updateSearchStatus, 60000);
+        }, 5000);
+    </script>
+</body>
