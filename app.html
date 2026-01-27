@@ -124,17 +124,17 @@
                         const actionsCell = row.insertCell(3);
                         //Delete button
                         const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Delete';
+                        deleteButton.textContent = 'Remove Search';
                         deleteButton.onclick = () => deleteSearch(data.Name);
                         actionsCell.appendChild(deleteButton);
                         //Purge button
                         const purgeButton = document.createElement('button');
-                        purgeButton.textContent = 'Purge';
+                        purgeButton.textContent = 'Purge Items';
                         purgeButton.onclick = () => purgeSearch(data.Name);
                         actionsCell.appendChild(purgeButton);
                         //Restart button
                         const restartButton = document.createElement('button');
-                        restartButton.textContent = 'Restart';
+                        restartButton.textContent = 'Refresh Search';
                         restartButton.onclick = () => restartSearch(data.Name);
                         actionsCell.appendChild(restartButton);
                     }
