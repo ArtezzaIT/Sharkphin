@@ -140,7 +140,7 @@ catch {
 Write-Host "Connecting to 365..."
 try{
     Import-Module ExchangeOnlineManagement
-    Connect-IPPSSession -EnableSeachOnlySession -ShowBanner:$false
+    Connect-IPPSSession -EnableSearchOnlySession -ShowBanner:$false
     $UPN = (Get-ConnectionInformation).UserPrincipalName
     Connect-ExchangeOnline -ShowBanner:$false -UserPrincipalName $UPN
 }
