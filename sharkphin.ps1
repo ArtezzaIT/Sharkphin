@@ -88,7 +88,7 @@ write-host "                                                                    
 Write-Host "Written by Benjamin and Madeline"
 Write-Host "Version $version, $channel channel"
 
-#Check platform
+#Check platform. These are built-in variables in PS 6+. Below PS6 we assume Windows only.
 if ($PSVersionTable.PSVersion.Major -lt 6) {
     # Code to run if PowerShell version is below 6
     Write-Host "Running on PowerShell version below 6"
@@ -140,7 +140,7 @@ catch {
 Write-Host "Connecting to 365..."
 try{
     Import-Module ExchangeOnlineManagement
-    Connect-IPPSSession -ShowBanner:$false
+    Connect-IPPSSession -EnableSeachOnlySession -ShowBanner:$false
     $UPN = (Get-ConnectionInformation).UserPrincipalName
     Connect-ExchangeOnline -ShowBanner:$false -UserPrincipalName $UPN
 }
