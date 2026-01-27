@@ -69,7 +69,7 @@ function Parse-QueryString {
 }
 
 #Program initialization
-$version = "0.4.0"
+$version = "0.4.1"
 $channel = "stable"
 
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
@@ -145,7 +145,7 @@ try{
     Connect-ExchangeOnline -ShowBanner:$false -UserPrincipalName $UPN
 }
 catch {
-    Write-Host "There was an error signing into the 365 tenant. Please verify the credentials you are using are correct and that the Exchange Online Module is installed."
+    Write-Host "There was an error signing into the 365 tenant. Please verify the credentials you are using are correct and that the Exchange Online Module is installed (running as admin may fix this problem)."
     Read-Host "Press enter to close."
     Disconnect-ExchangeOnline -Confirm:$false
     exit
