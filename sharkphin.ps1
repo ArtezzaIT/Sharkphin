@@ -1,5 +1,5 @@
 #    Aretzza Sharkphin - Phishing Response Tool
-#    Copyright (C) 2022  Benjamin Jaros and Madeline Susemiehl
+#    Copyright (C) 2026  Benjamin Jaros
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -15,6 +15,34 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #Function definitions
+
+# Function to validate email address format
+function Test-EmailAddress {
+    param (
+        [string]$Email
+    )
+    try {
+        $null = [System.Net.Mail.MailAddress]::new($Email)
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+# Function to validate DNS names
+function Test-IsValidDnsName {
+    param([string]$name)
+
+    # Use the DnsName type to validate the syntax
+    $isValidSyntax = [System.Uri]::CheckHostName($name)
+
+    if ($isValidSyntax -in @('Dns', 'FullyQualified', 'Simple') -and $name -contains '.') {
+        return $true
+    } else {
+        return $false
+    }
+}
 
 #Create new search in 365
 function New-CustomSearch {
@@ -69,7 +97,7 @@ function Parse-QueryString {
 }
 
 #Program initialization
-$version = "0.4.1"
+$version = "0.5.0"
 $channel = "stable"
 
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
@@ -85,7 +113,6 @@ write-host " \/\_____\  \ \_\ \_\  \ \_\ \_\  \ \_\ \_\  \ \_\ \_\  \ \_\    \ \
 write-host "  \/_____/   \/_/\/_/   \/_/\/_/   \/_/ /_/   \/_/\/_/   \/_/     \/_/\/_/   \/_/   \/_/ \/_/ "
 write-host "                                                                                              "
 
-Write-Host "Written by Benjamin and Madeline"
 Write-Host "Version $version, $channel channel"
 
 #Check platform. These are built-in variables in PS 6+. Below PS6 we assume Windows only.
@@ -323,6 +350,49 @@ while ($activeSession) {
                 $response = "HTTP/1.1 400 Bad Request`r`nContent-Type: text/html`r`n`r`n$htmlContent"
                 $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
             }
+        }
+        "/block" {
+            # Handle block request
+            Write-Host "Handling block request"
+            # Extract search query parameters
+            $blockItem = $queryParams["blockitem"]
+
+            #Check if SHA256 hash or email address
+            if ($blockItem -match '^[A-Fa-f0-9]{64}$'){
+                try{
+                    New-TenantAllowBlockListItems -ListType FileHash -Block -Entries $blockItem -NoExpiration
+                    $resultMessage = "File hash $blockItem blocked successfully."
+                }
+                catch {
+                    Write-Host "Error blocking file hash: $_"
+                    $resultMessage = "Error blocking file hash $blockItem."
+                }
+            } elseif (Test-EmailAddress -Email $blockItem) {
+                try {
+                    New-TenantAllowBlockListItems -ListType Sender -Block -Entries $blockItem -NoExpiration
+                    $resultMessage = "Email address $blockItem blocked successfully."
+                }
+                catch {
+                    Write-Host "Error blocking email address: $_"
+                    $resultMessage = "Error blocking email address $blockItem."
+                }
+            } elseif (Test-IsValidDnsName -name $blockItem) {
+                try {
+                    New-TenantAllowBlockListItems -ListType Sender -Block -Entries $blockItem -NoExpiration -ErrorAction Stop
+                    $resultMessage = "Sending domain $blockItem blocked successfully."
+                }
+                catch {
+                    Write-Host "Error blocking sending domain: $_"
+                    $resultMessage = "Error blocking sending domain $blockItem."
+                }
+            } else {
+                $resultMessage = "The provided block item '$blockItem' is not a valid email address, domain, or SHA256 file hash."
+            }
+            $htmlFilePath = "$PSScriptRoot\search.html"
+            $htmlContent = Get-Content -Path $htmlFilePath -Raw
+            $htmlContent =  $htmlContent -replace "##RESULTMESSAGE##", $resultMessage
+            $response = "HTTP/1.1 200 OK`r`nContent-Type: text/html`r`n`r`n$htmlContent"
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
         }
         default {
             # Handle unknown page request
