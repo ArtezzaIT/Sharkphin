@@ -37,7 +37,7 @@ function Test-IsValidDnsName {
     # Use the DnsName type to validate the syntax
     $isValidSyntax = [System.Uri]::CheckHostName($name)
 
-    if ($isValidSyntax -in @('Dns', 'FullyQualified', 'Simple') -and $name -contains '.') {
+    if ($isValidSyntax -in @('Dns', 'FullyQualified', 'Simple') -and $name -like '*.*') {
         return $true
     } else {
         return $false
