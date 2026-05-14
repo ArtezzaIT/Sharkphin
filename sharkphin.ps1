@@ -97,7 +97,7 @@ function Parse-QueryString {
 }
 
 #Program initialization
-$version = "0.5.0"
+$version = "0.6.0"
 $channel = "stable"
 
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
@@ -320,6 +320,35 @@ while ($activeSession) {
                 }
                 catch {
                     $answer = "Error purging search $searchName"
+                }
+                $response = "HTTP/1.1 200 OK`r`nContent-Type: text/plain`r`n`r`n$answer"
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
+            } else {
+                $htmlFilePath = "$PSScriptRoot\400.html"
+                $htmlContent = Get-Content -Path $htmlFilePath -Raw
+                $response = "HTTP/1.1 400 Bad Request`r`nContent-Type: text/html`r`n`r`n$htmlContent"
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
+            }
+        }
+        "/harddelete" {
+            # Delete a compliance search
+            Write-Host "Handling HARD DELETE search request"
+            $searchName = $queryParams["name"]
+            if ($searchName) {
+                try {
+                    New-ComplianceSearchAction -SearchName $searchName -Purge -PurgeType HardDelete -Confirm:$false
+                    $answer = "Search $searchName hard delete started successfully"
+                    try {
+                        Write-Host "Trying to start Managed Folder Assistant to immediately remove items..."
+                        Get-Mailbox -ResultSize Unlimited | ForEach-Object { Start-ManagedFolderAssistant -Identity $_.UserPrincipalName -ComplianceJob}
+                        Write-Host "Completed attempt."
+                    }
+                    catch {
+                        Write-Host "Error starting Managed Folder Assistant: $_"
+                    }
+                }
+                catch {
+                    $answer = "Error hard deleting search $searchName"
                 }
                 $response = "HTTP/1.1 200 OK`r`nContent-Type: text/plain`r`n`r`n$answer"
                 $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
