@@ -21,7 +21,7 @@
         You are connected using ##UPN##
         <a href="/logout">Logout</a>
         <br>
-        <label><input type="checkbox" id="advanced" name="advanced"> Use Advanced Options</a></label>
+        <label><input type="checkbox" id="advanced" name="advanced"> Use Advanced Options</label>
         <br>
     </div>
     <br>
@@ -31,7 +31,7 @@
             <table>
                 <tr>
                     <td>
-                        <label for="blockitem">Email Address or SHA256 File Hash:</label>
+                        <label for="blockitem">Email Address, Email Domain, or SHA256 File Hash:</label>
                     </td>
                     <td>
                         <input type="text" id="blockitem" name="blockitem" required>
@@ -81,6 +81,7 @@
                 </tr>
             </table>
         </form>
+        <label style="display:none; color:white; background:red; font-weight:bold; border-radius:5px; padding:2px 6px;"><input type="checkbox" id="nosubjectsearch" name="nosubjectsearch"> Create search without a subject</label>
     </div>
     <br>
     <div>
@@ -325,8 +326,38 @@
         }, 5000);
 
         document.getElementById('advanced').addEventListener('change', function() {
+            const subjectInput = document.getElementById('subject');
+            const noSubjectLabel = document.getElementById('nosubjectsearch').closest('label');
             if (this.checked) {
+                //Open the wiki page in a new tab for Advanced Options use and warnings
                 window.open('https://github.com/ArtezzaIT/Sharkphin/wiki/Advanced-Options', '_blank');
+                // Show the no-subject checkbox when advanced options are enabled
+                if (noSubjectLabel) {
+                    noSubjectLabel.style.display = 'block';
+                }
+            } else {
+                //Re-enable subject input when advanced options are unchecked
+                subjectInput.disabled = false;
+                subjectInput.setAttribute('required', '');
+                //Hide the nosubjectsearch checkbox when advanced options is unchecked
+                document.getElementById('nosubjectsearch').checked = false;
+                if (noSubjectLabel) {
+                    noSubjectLabel.style.display = 'none';
+                }
+            }
+        });
+
+        document.getElementById('nosubjectsearch').addEventListener('change', function() {
+            const subjectInput = document.getElementById('subject');
+            if (this.checked) {
+                //Disable subject input in the GUI
+                subjectInput.value = '';
+                subjectInput.removeAttribute('required');
+                subjectInput.disabled = true;
+            }else {
+                //Re-enable subject input when advanced options are unchecked
+                subjectInput.disabled = false;
+                subjectInput.setAttribute('required', '');
             }
         });
     </script>
