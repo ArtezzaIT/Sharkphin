@@ -57,8 +57,12 @@ function New-CustomSearch {
     #Escape quotes for KQL query string
     $InputPhishSubject = $InputPhishSubject.Replace("'","''")
 
-	#Combine the email address and the subject into one string
-    $InputMatchQuery="(From:"+$InputPhishSenderName+") AND (Subject:`""+$InputPhishSubject+"`")"
+    #If a subject was provided, use it in the search query. If not, search for any subject.
+    if ($InputPhishSubject) {
+        $InputMatchQuery="(From:"+$InputPhishSenderName+") AND (Subject:`""+$InputPhishSubject+"`")"
+    } else {
+        $InputMatchQuery="(From:"+$InputPhishSenderName+")"
+    }
 
     Write-Host "Building search $ContentSearchName..."
 
@@ -97,7 +101,7 @@ function Parse-QueryString {
 }
 
 #Program initialization
-$version = "0.6.0"
+$version = "0.7.0"
 $channel = "stable"
 
 write-host "        ______     ______     ______   ______     ______     ______     ______                "
@@ -257,6 +261,15 @@ while ($activeSession) {
             # Perform search operation
             if ($searchName -and $phishSenderName -and $phishSubject) {
                 $resultMessage = New-CustomSearch -ContentSearchName $searchName -InputPhishSenderName $phishSenderName -InputPhishSubject $phishSubject
+                $htmlFilePath = "$PSScriptRoot\search.html"
+                $htmlContent = Get-Content -Path $htmlFilePath -Raw
+                $htmlContent =  $htmlContent -replace "##RESULTMESSAGE##", $resultMessage
+                $htmlContent =  $htmlContent -replace "##UPN##", $UPN
+                $htmlContent =  $htmlContent -replace "##SEARCHNAME##", $searchName
+                $response = "HTTP/1.1 200 OK`r`nContent-Type: text/html`r`n`r`n$htmlContent"
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($response)
+            } elseif ($searchName -and $phishSenderName) {
+                $resultMessage = New-CustomSearch -ContentSearchName $searchName -InputPhishSenderName $phishSenderName
                 $htmlFilePath = "$PSScriptRoot\search.html"
                 $htmlContent = Get-Content -Path $htmlFilePath -Raw
                 $htmlContent =  $htmlContent -replace "##RESULTMESSAGE##", $resultMessage
